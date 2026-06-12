@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研究用品 一括検索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #F7F7F5;
+    --surface: #FFFFFF;
+    --border:  #E4E4E0;
+    --text:    #1A1A18;
+    --muted:   #6B6B68;
+    --accent:  #2563EB;
+    --accent-light: #EEF3FD;
+    --mono-blue: #1a6fc4;
+    --mono-bg:   #e8f4fd;
+    --axel-orange: #c07a10;
+    --axel-bg:   #fef3e2;
+    --askul-green: #2a7a3b;
+    --askul-bg:  #eaf5ec;
+    --radius:  10px;
+    --radius-sm: 6px;
+  }
+
+  body {
+    font-family: 'Inter', 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 48px 16px 80px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  header h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  header p {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  .search-box {
+    width: 100%;
+    max-width: 640px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .input-row input {
+    flex: 1;
+    font-size: 15px;
+    font-family: inherit;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .input-row input:focus {
+    border-color: var(--accent);
+    background: #fff;
+  }
+
+  .input-row input::placeholder {
+    color: #aaa;
+  }
+
+  .btn-search {
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .btn-search:hover { opacity: 0.88; }
+  .btn-search:active { opacity: 0.78; }
+
+  #status {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    min-height: 18px;
+  }
+
+  .results {
+    width: 100%;
+    max-width: 640px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .site-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: border-color 0.15s;
+  }
+
+  .site-card:hover { border-color: #c0bfbb; }
+
+  .site-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .site-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 18px;
+  }
+
+  .site-name {
+    font-size: 15px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .site-desc {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .btn-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    font-family: inherit;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    white-space: nowrap;
+    transition: background 0.12s, border-color 0.12s;
+    flex-shrink: 0;
+  }
+
+  .btn-open:hover { background: #ededea; border-color: #c0bfbb; }
+
+  .btn-open svg {
+    width: 13px;
+    height: 13px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .divider {
+    width: 100%;
+    max-width: 640px;
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 6px 0;
+  }
+
+  .btn-all {
+    width: 100%;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.12s, border-color 0.12s;
+  }
+
+  .btn-all:hover { background: #f0efec; border-color: #c0bfbb; }
+  .btn-all:active { background: #e8e7e4; }
+
+  .btn-all svg {
+    width: 16px;
+    height: 16px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 21px; }
+    .site-desc { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>研究用品 一括検索</h1>
+  <p>モノタロウ・Axel・アスクルを同時に検索</p>
+</header>
+
+<div class="search-box">
+  <div class="input-row">
+    <input type="text" id="q" placeholder="例: マイクロチューブ 1.5mL、ニトリルグローブ S…" />
+    <button class="btn-search" onclick="doSearch()">検索</button>
+  </div>
+  <div id="status"></div>
+</div>
+
+<div class="results" id="results">
+
+  <div class="site-card">
+    <div class="site-info">
+      <div class="site-icon" style="background:var(--mono-bg)">
+        <svg width="20" height="20" fill="none" stroke="var(--mono-blue)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div>
+        <div class="site-name">モノタロウ</div>
+        <div class="site-desc">工業用品・研究用品の専門通販</div>
+      </div>
+    </div>
+    <a id="link-monotaro" href="#" target="_blank" rel="noopener" class="btn-open">
+      開く
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+
+  <div class="site-card">
+    <div class="site-info">
+      <div class="site-icon" style="background:var(--axel-bg)">
+        <svg width="20" height="20" fill="none" stroke="var(--axel-orange)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+        </svg>
+      </div>
+      <div>
+        <div class="site-name">Axel（アクセル）</div>
+        <div class="site-desc">研究・実験器具の専門サイト</div>
+      </div>
+    </div>
+    <a id="link-axel" href="#" target="_blank" rel="noopener" class="btn-open">
+      開く
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+
+  <div class="site-card">
+    <div class="site-info">
+      <div class="site-icon" style="background:var(--askul-bg)">
+        <svg width="20" height="20" fill="none" stroke="var(--askul-green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+          <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="site-name">アスクル</div>
+        <div class="site-desc">オフィス・医療・研究用品の通販</div>
+      </div>
+    </div>
+    <a id="link-askul" href="#" target="_blank" rel="noopener" class="btn-open">
+      開く
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+    </a>
+  </div>
+
+  <hr class="divider">
+
+  <button class="btn-all" onclick="openAll()">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+    3サイトをまとめて開く
+  </button>
+
+</div>
+
+<script>
+const SITES = {
+  monotaro: q => `https://www.monotaro.com/s/?c=&q=${encodeURIComponent(q)}`,
+  axel:     q => `https://axel.as-1.co.jp/asone/keyword/?q=${encodeURIComponent(q)}`,
+  askul:    q => `https://www.askul.co.jp/ksearch/?searchWord=${encodeURIComponent(q)}`
+};
+
+let currentQuery = '';
+
+function doSearch() {
+  const q = document.getElementById('q').value.trim();
+  if (!q) {
+    document.getElementById('status').textContent = 'キーワードを入力してください';
+    return;
+  }
+  currentQuery = q;
+  document.getElementById('status').textContent = `「${q}」で検索`;
+  document.getElementById('link-monotaro').href = SITES.monotaro(q);
+  document.getElementById('link-axel').href     = SITES.axel(q);
+  document.getElementById('link-askul').href    = SITES.askul(q);
+  document.getElementById('results').style.display = 'flex';
+}
+
+function openAll() {
+  if (!currentQuery) return;
+  // ユーザーのクリックイベント内で同期的に1つ目を開き、残りはa要素経由でクリック
+  const urls = [SITES.monotaro(currentQuery), SITES.axel(currentQuery), SITES.askul(currentQuery)];
+  urls.forEach((url, i) => {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  });
+}
+
+document.getElementById('q').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+</script>
+
+</body>
+</html>
